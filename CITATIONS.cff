@@ -1,0 +1,31 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: 'AutoGesture: A data collection toolbox with an integrated Auto-Labeling Pipeline'
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Tom
+    family-names: Hetto
+    orcid: 'https://orcid.org/0000-0001-8097-2296'
+identifiers:
+  - type: url
+    value: 'https://github.com/HMT-Engineering/AutoGesture'
+    description: GitHub Repository
+repository-code: 'https://github.com/HMT-Engineering/AutoGesture'
+repository: 'https://github.com/HMT-Engineering/AutoGesture'
+abstract: >
+  AutoGesture is a data collection toolbox for the Ultraleap Leap Motion
+  Controller. It provides an integrated auto-labeling pipeline for hand gesture
+  recognition. The toolbox is designed to be easy to use and flexible, allowing
+  users to customize their data collection process and integrate it with their
+  own machine learning models.
+keywords:
+  - Python
+  - Hand Gesture Recognition
+  - Data Collection
+  - Leap Motion Controller
+  - Ultraleap
