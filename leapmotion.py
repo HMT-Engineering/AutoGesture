@@ -103,27 +103,27 @@ class Pose(Enum):
     Resting = 98
     Unknown = 99
 
-poses = [
+default_poses = [
     {
         "pose": Pose.Pinch,
-        "poseVector": np.array([22,19,50,53,27,24,29,17,18,20,15,11,13,11])
+        "poseVector": np.array([7,12,46,47,27,11,16,11,10,11,9,11,7,9])
     },
     {
         "pose": Pose.Fist,
-        "poseVector": np.array([30,30,71,84,35,82,83,37,77,85,40,82,84,41])
+        "poseVector": np.array([46,38,77,81,38,87,87,40,88,84,40,83,82,42])
     },
-    {
-        "pose": Pose.Flat,
-        "poseVector": np.array([8,0,0,2,4,9,1,1,6,0,1,17,0,4])
-    },
+    # {
+    #     "pose": Pose.Flat,
+    #     "poseVector": np.array([7,6,18,6,12,16,4,10,13,5,9,17,3,9])
+    # },
     {
         "pose": Pose.IndexTap,
-        "poseVector": np.array([4,4,63,63,32,13,11,6,4,5,6,19,1,5])
+        "poseVector": np.array([3,4,66,51,28,27,18,9,17,14,7,8,8,8])
     },
-    {
-        "pose": Pose.AllFingerTap,
-        "poseVector": np.array([3,7,72,83,37,86,84,41,84,82,43,79,81,44])
-    },
+    # {
+    #     "pose": Pose.AllFingerTap,
+    #     "poseVector": np.array([2,7,56,60,29,61,54,26,54,56,32,49,52,31])
+    # },
     # {
     #     "pose": Pose.WristFlickUp,
     #     "poseVector": np.array([16,12,29,30,22,26,29,18,18,26,17,3,17,17])
@@ -140,13 +140,13 @@ poses = [
     #     "pose": Pose.WristFlickOut,
     #     "poseVector": np.array([7,3,27,7,7,25,6,10,20,6,10,22,8,8])
     # },
-    {
-        "pose": Pose.PinkyPinch,
-        "poseVector": np.array([29,20,12,10,7,8,8,6,6,12,9,43,47,23])
-    },
+    # {
+    #     "pose": Pose.PinkyPinch,
+    #     "poseVector": np.array([18,16,9,30,24,9,21,18,4,23,19,20,40,24])
+    # },
     {
         "pose": Pose.Resting,
-        "poseVector": np.array([3,6,5,11,9,11,20,13,12,21,14,16,20,15])
+        "poseVector": np.array([7,3,9,11,8,8,12,7,11,13,8,5,9,7])
     }
 ]
 class HandPose:
@@ -154,7 +154,7 @@ class HandPose:
         self.pose = Pose.Unknown
         self.poseVector = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0])
 
-    def calculate_similarity(self, input_vector: np.ndarray[float], target_vector: np.ndarray[float]) -> float:
+    def calculate_similarity(self, target_vector: np.ndarray[float]) -> float:
         """
         Calculate cosine similarity between two vectors.
 
@@ -162,35 +162,37 @@ class HandPose:
         :param target_angles: Array of target angles.
         :return: Cosine similarity score.
         """
-        dot_product = np.dot(input_vector, target_vector)
-        norm_input = np.linalg.norm(input_vector)
+        dot_product = np.dot(self.poseVector, target_vector)
+        norm_input = np.linalg.norm(self.poseVector)
         norm_target = np.linalg.norm(target_vector)
         return dot_product / (norm_input * norm_target)
     
-    def decode_pose(self):
-        self.decodedPose = Pose.Resting
-        # if self.handRot[0] < -30:
-        #     self.decodedPose = Pose.WristFlickDown
-        # elif self.handRot[0] > 50:
-        #     self.decodedPose = Pose.WristFlickUp
-        # elif (self.handRot[1] - restingRotation) > 15:
-        #     self.decodedPose = Pose.WristFlickOut
-        # elif self.handRot[1] < -15: ##UNATURAL MOVEMENT
-        #     self.decodedPose = Pose.WristFlickIn
-        highestSimilarity = 0
-        for pose in poses:
-            similarity = self.calculate_similarity(self.poseVector, pose["poseVector"])
-            if similarity > highestSimilarity:
-                self.decodedPose = pose["pose"]
-                highestSimilarity = similarity
-        print(self.decodedPose)
-        print(highestSimilarity)
-        return self.decodedPose
+def get_most_similar_pose(poseVector: np.ndarray[float], poses: list[dict]) -> HandPose:
+    decodedPose = Pose.Resting
+    handPose = HandPose()
+    handPose.poseVector = poseVector
+    # if self.handRot[0] < -30:
+    #     self.decodedPose = Pose.WristFlickDown
+    # elif self.handRot[0] > 50:
+    #     self.decodedPose = Pose.WristFlickUp
+    # elif (self.handRot[1] - restingRotation) > 15:
+    #     self.decodedPose = Pose.WristFlickOut
+    # elif self.handRot[1] < -15: ##UNATURAL MOVEMENT
+    #     self.decodedPose = Pose.WristFlickIn
+    highestSimilarity = 0
+    for pose in poses:
+        similarity = handPose.calculate_similarity(poseVector, pose["poseVector"])
+        if similarity > highestSimilarity:
+            decodedPose = pose["pose"]
+            highestSimilarity = similarity
+    if highestSimilarity < 0.9:
+        decodedPose = Pose.Unknown
+    handPose.pose = decodedPose
 
    
 
-def decode_pose (hand: ldt.Hand, restingRotation = 0):
-    handPose = HandPose()
+def decode_pose (hand: ldt.Hand, restingRotation = 0, poses: list[dict] = default_poses) -> HandPose:
+    HandPose()
     pinchDistance = hand.pinch_distance
     pinchStrength = hand.pinch_strength
     thumb = hand.digits[0]
@@ -215,15 +217,14 @@ def decode_pose (hand: ldt.Hand, restingRotation = 0):
     handRot = np.rad2deg(euler_from_quaternion(hand.palm.orientation))
     if(handRot[2] < 0):
         handRot[2] = handRot[2] + 360
-    handPose.poseVector = np.array([
+    poseVector = np.array([
         thumbBaseAngle,thumbTipAngle,
         indexBaseAngle,indexMiddleAngle,indexTipAngle,
         middleBaseAngle,middleMiddleAngle,middleTipAngle,
         ringBaseAngle,ringMiddleAngle,ringTipAngle,
         pinkyBaseAngle,pinkyMiddleAngle,pinkyTipAngle
     ])
-    handPose.decode_pose()
-    return handPose
+    return get_most_similar_pose(poseVector, poses)
    
 
 
@@ -238,15 +239,19 @@ def get_angle(metacarpal_bone:ldt.Bone, proximal_phalange_bone:ldt.Bone):
 
 
 class GestureListener(leap.Listener):
-    def __init__(self, poseDetectedCallback: Callable[[Event,HandPose], None]):
+    def __init__(self, poseDetectedCallback: Callable[[Event,HandPose], None], customposes: dict[str, HandPose] = None):
         self.restingRotation = 0
         self.restingRotations = [0]
         self.poseDetectedCallback = poseDetectedCallback
+        if customposes is not None:
+            self.poses = customposes
+        else:
+            self.poses = default_poses
 
     def on_tracking_event(self, event):
         if len(event.hands) != 0:
             hand = event.hands[0]
-            pose = decode_pose(hand)#, self.restingRotation)
+            pose = decode_pose(hand, poses=self.poses)
             # if(pose.decodedPose == Pose.Resting or pose.decodedPose == Pose.WristFlickOut):
             #     self.restingRotations.append(pose.handRot[1])
             #     if(len(self.restingRotations) > 40):

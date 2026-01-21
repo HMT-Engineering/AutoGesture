@@ -16,10 +16,6 @@ gesture_classes = {
     "Pose.Unknown": "99",
     "":"99"
 }
-# File paths
-acc_file = '/Users/tomhetto/Development/Promotion/imu-gesture-detection/Python/recordings/1737040165094/acc.csv'
-ppg_file = '/Users/tomhetto/Development/Promotion/imu-gesture-detection/Python/recordings/1737040165094/ppg.csv'
-action_annotations_file = '/Users/tomhetto/Development/Promotion/imu-gesture-detection/Python/recordings/1737040165094/action_annotations.csv'
 
 def merge_data(gesture_data, sensor_data):
     # Read CSV files

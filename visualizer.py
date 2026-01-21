@@ -8,7 +8,8 @@ from leapmotion import Pose, decode_pose
 from leap.events import Event
 
 class HandAngles():
-     def __init__(self, parameters):
+    
+    def __init__(self, parameters):
         self.thumb = parameters["thumb"]
         self.index = parameters["index"]
         self.middle = parameters["middle"]

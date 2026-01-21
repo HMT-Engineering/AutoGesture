@@ -12,7 +12,7 @@ def preprocess(csv_file_path):
 
     # Convert the timeseries to actionAnnotationList format
     window_size = 100
-    pre_window_steps = 10
+    pre_window_steps = 25
     action_annotation_list = []
     smoothed_list = []
     first_timestamp = poses[0][0]
@@ -20,8 +20,10 @@ def preprocess(csv_file_path):
 
     for timestamp, pose in poses:
         if(timestamp - first_timestamp > window_size/2 and timestamp < last_timestamp - window_size/2):
-            poses_in_window = [p for p in poses if p[0] > timestamp - window_size/2 and p[0] < timestamp + window_size/2]
+            poses_in_window = [p for p in poses if p[0] >= timestamp - window_size/2 and p[0] <= timestamp + window_size/2]
             most_common_pose = max(set([p[1] for p in poses_in_window]), key=[p[1] for p in poses_in_window].count)
+            if most_common_pose == "Pose.Unknown":
+                most_common_pose = "Pose.Resting"
             action_annotation_list.append({"Timestamp": timestamp, "Pose": most_common_pose})
 
     #Pre transition smoothing to get the transition itself classified.
@@ -42,5 +44,5 @@ def preprocess(csv_file_path):
             writer.writerow(annotation)
 
 if __name__ == "__main__":
-    folder_path = input("Enter the folder path containing CSV files: ")
+    folder_path = input("Select the annotations file:")
     preprocess(folder_path)

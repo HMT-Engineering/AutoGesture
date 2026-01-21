@@ -9,6 +9,7 @@ import cv2
 from bleak import BleakGATTCharacteristic
 import csv
 
+import argparse
 import threading
 
 import leap
@@ -24,11 +25,13 @@ class FingerTracking:
         self.recording = False
         self.recorded_hands = {}
         self.recorded_poses = {}
+        self.manual_poses = {}
         self.recorded_frames = {}
         self.recorded_ppg = {}
         self.recorded_gyro = {}
         self.recorded_acc = {}
         self.start_timestamp = "0"
+        self._manual_label = "Pose.Resting"
         self.canvas = Canvas()
         self.framerate = 30
         self.last_frame_time = time.time()
@@ -47,6 +50,8 @@ class FingerTracking:
         if(self.recording):
             self.recorded_hands[timestamp] = pose
             self.recorded_poses[timestamp] = pose.decodedPose
+            if(self._manual_label != ""):
+                self.manual_poses[timestamp] = self._manual_label
         
     def save_recorded_data(self):
         Path(f"./recordings/{self.start_timestamp}").mkdir(exist_ok=True)
@@ -76,6 +81,11 @@ class FingerTracking:
             writer.writerow(["Timestamp", "Pose"])
             for time in self.recorded_poses.keys():
                 writer.writerow([time,self.recorded_poses[time]])
+        with open(f"./recordings/{self.start_timestamp}/manual_poses.csv", 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Timestamp", "Pose"])
+            for time in self.manual_poses.keys():
+                writer.writerow([time,self.manual_poses[time]])
         # with open(f"./recordings/{self.start_timestamp}/raw_hands.json", 'w') as f:
         #     json.dump(self.recorded_hands,f,default=lambda o: o.__dict__)
  
@@ -97,8 +107,8 @@ class FingerTracking:
                     case 'P':
                         self.recorded_ppg[time] = values
         
-    async def mainloop(self):
-        tracking_listener = GestureListener(self.on_pose_detected)
+    async def mainloop(self, poses: list[dict] = None):
+        tracking_listener = GestureListener(self.on_pose_detected, customposes=poses)
         connection = leap.Connection()
         connection.add_listener(tracking_listener)
         with connection.open():
@@ -124,6 +134,14 @@ class FingerTracking:
                     if(self.client is not None):
                         await stopRecording(self.client, str(int(1000*time.time())))
                     self.save_recorded_data()
+                    self.recorded_hands = {}
+                    self.recorded_poses = {}
+                    self.manual_poses = {}
+                    self.recorded_frames = {}
+                    self.recorded_ppg = {}
+                    self.recorded_gyro = {}
+                    self.recorded_acc = {}
+                    self.start_timestamp = "0"
                 elif key == ord("c"):
                     self.client = await searchAndConnectToWatch()
                     if(self.client is not None):
@@ -131,11 +149,35 @@ class FingerTracking:
                         await subscribeToData(self.client, self.process_watch_data)
                     else:
                         print("Could not connect to watch")
+                elif key == ord("j"):
+                    self._manual_label = "Pose.Fist"
+                    print(f"Manual label set to Fist")
+                elif key == ord("k"):
+                    self._manual_label = "Pose.Pinch"
+                    print(f"Manual label set to Pinch")
+                elif key == ord("l"):
+                    self._manual_label = "Pose.IndexTap"
+                    print(f"Manual label set to IndexTap")
+                elif key == ord(" "):
+                    print(f"Manual label set to Resting")
+                    self._manual_label = "Pose.Resting"
 
-
-async def start_window():
+async def start_window(poses: list[dict] = None):
     fingertracker = FingerTracking()
-    await fingertracker.mainloop()
+    await fingertracker.mainloop(poses)
 
 if __name__ == "__main__":
-    asyncio.run(start_window())
+    parser = argparse.ArgumentParser(description="Pose Recording Tool")
+    parser.add_argument("--path", type=str , help="Path to poses.json file")
+    args = parser.parse_args()
+    print(args)
+    if args.path:
+        try:
+            with open(args.path, 'r') as f:
+                poses = json.load(f)
+        except FileNotFoundError:
+            print(f"File {args.path} not found.")
+            poses = None
+    else:
+        poses = None
+    asyncio.run(start_window(poses))
