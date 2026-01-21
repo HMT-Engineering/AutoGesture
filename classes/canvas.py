@@ -1,23 +1,10 @@
-import time
-import leap
 import numpy as np
 import cv2
 
-from leapmotion import Pose, decode_pose
+from classes.handAngles import HandAngles
+from leapmotion import Pose
 
 from leap.events import Event
-
-class HandAngles():
-    
-    def __init__(self, parameters):
-        self.thumb = parameters["thumb"]
-        self.index = parameters["index"]
-        self.middle = parameters["middle"]
-        self.ring = parameters["ring"]
-        self.pinky = parameters["pinky"]
-        self.handRot = parameters["handRot"]
-        self.pinchDistance = parameters["pinchDistance"]
-        self.pinchStrength = parameters["pinchStrength"]
 class Canvas:
     def __init__(self):
         self.name = "Hand Visualizer"
@@ -33,11 +20,11 @@ class Canvas:
             return int(bone.x + (self.screen_size[1] / 2)), int(bone.z + (self.screen_size[0] / 2))
         else:
             return None
-        
+
     def save_to_file(self, filename):
         cv2.imwrite(filename, self.output_image)
 
-    def render_timestamp(self,time):
+    def render_timestamp(self, time):
         cv2.putText(
             self.output_image,
             time,
@@ -48,7 +35,7 @@ class Canvas:
             1,
         )
 
-    def render_instructions(self,instructions, recording=False):
+    def render_instructions(self, instructions, recording=False):
         cv2.putText(
             self.output_image,
             instructions,
@@ -58,10 +45,11 @@ class Canvas:
             self.recording_font_colour if recording else self.font_colour,
             1,
         )
-    def render_hand_angles(self, hand: HandAngles): 
+
+    def render_hand_angles(self, hand: HandAngles):
         cv2.putText(
             self.output_image,
-            f"Thumb: {hand.thumb['base'],hand.thumb['tip']}",
+            f"Thumb: {hand.thumb['base'], hand.thumb['tip']}",
             (10, self.screen_size[0] - 10),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
@@ -70,7 +58,7 @@ class Canvas:
         )
         cv2.putText(
             self.output_image,
-            f"Index: {hand.index['base'],hand.index['middle'],hand.index['tip']}",
+            f"Index: {hand.index['base'], hand.index['middle'], hand.index['tip']}",
             (10, self.screen_size[0] - 30),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
@@ -79,7 +67,7 @@ class Canvas:
         )
         cv2.putText(
             self.output_image,
-            f"Middle: {hand.middle['base'],hand.middle['middle'],hand.middle['tip']}",
+            f"Middle: {hand.middle['base'], hand.middle['middle'], hand.middle['tip']}",
             (10, self.screen_size[0] - 50),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
@@ -88,7 +76,7 @@ class Canvas:
         )
         cv2.putText(
             self.output_image,
-            f"Ring: {hand.ring['base'],hand.ring['middle'],hand.ring['tip']}",
+            f"Ring: {hand.ring['base'], hand.ring['middle'], hand.ring['tip']}",
             (10, self.screen_size[0] - 70),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
@@ -97,7 +85,7 @@ class Canvas:
         )
         cv2.putText(
             self.output_image,
-            f"Pinky: {hand.pinky['base'],hand.pinky['middle'],hand.pinky['tip']}",
+            f"Pinky: {hand.pinky['base'], hand.pinky['middle'], hand.pinky['tip']}",
             (10, self.screen_size[0] - 90),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
@@ -131,9 +119,9 @@ class Canvas:
             self.font_colour,
             1,
         )
-        
-    def render_pose(self, motion:Pose):
-         cv2.putText(
+
+    def render_pose(self, motion: Pose):
+        cv2.putText(
             self.output_image,
             f"Detected Motion: {motion}",
             (10, self.screen_size[0] - 10),
@@ -142,8 +130,8 @@ class Canvas:
             self.font_colour,
             1,
         )
-         
-    def render_hands(self, event:Event):
+
+    def render_hands(self, event: Event):
         # Clear the previous image
         self.output_image[:, :] = 0
 
@@ -180,7 +168,7 @@ class Canvas:
                         cv2.line(self.output_image, bone_start, bone_end, self.hands_colour, 2)
 
                     if ((index_digit == 0) and (index_bone == 0)) or (
-                        (index_digit > 0) and (index_digit < 4) and (index_bone < 2)
+                            (index_digit > 0) and (index_digit < 4) and (index_bone < 2)
                     ):
                         index_digit_next = index_digit + 1
                         digit_next = hand.digits[index_digit_next]
@@ -198,71 +186,3 @@ class Canvas:
                     if index_bone == 0 and bone_start and wrist:
                         cv2.line(self.output_image, bone_start, wrist, self.hands_colour, 2)
 
-
-class TrackingListener(leap.Listener):
-    def __init__(self, canvas):
-        self.poses = []
-        self.canvas : Canvas = canvas
-        self.pose = "No Hands Detected"
-        self.restingRotation = 0
-        self.restingRotations = [0]
-
-    def on_connection_event(self, event):
-        pass
-
-    def on_device_event(self, event):
-        try:
-            with event.device.open():
-                info = event.device.get_info()
-        except leap.LeapCannotOpenDeviceError:
-            info = event.device.get_info()
-
-        print(f"Found device {info.serial}")
-
-    def on_tracking_event(self, event):
-        if len(event.hands) != 0:
-            hand = event.hands[0]
-            hand_type = "Left" if str(hand.type) == "HandType.Left" else "Right"
-
-            tmppose = decode_pose(hand, self.restingRotation)
-            self.poses.append(tmppose.decodedPose.value)
-
-            if(tmppose.decodedPose == Pose.Resting or tmppose.decodedPose == Pose.WristFlickOut):
-                self.restingRotations.append(tmppose.handRot[1])
-                #print(self.restingRotations)
-                if(len(self.restingRotations) > 40):
-                    self.restingRotations.pop(0)
-                    self.restingRotation = np.average(self.restingRotations)
-
-            if(len(self.poses) > 5):
-                self.poses.pop(0)
-                self.pose = Pose(np.median(self.poses))
-                print(f"Hand pose: {self.pose.name}")
-        self.canvas.render_hands(event,self.pose)
-
-
-def main():
-    canvas = Canvas()
-
-    print(canvas.name)
-
-    tracking_listener = TrackingListener(canvas)
-
-    connection = leap.Connection()
-    connection.add_listener(tracking_listener)
-
-    running = True
-
-    with connection.open():
-        connection.set_tracking_mode(leap.TrackingMode.Desktop)
-
-        while running:
-            cv2.imshow(canvas.name, canvas.output_image)
-            
-            key = cv2.waitKey(1)
-
-            if key == ord("x"):
-                running = False
-            
-if __name__ == "__main__":
-    main()

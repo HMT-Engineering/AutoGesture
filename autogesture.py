@@ -5,8 +5,8 @@ from tkinter import filedialog
 from PIL import Image, ImageTk
 import json
 
-from pose_calibration import calibrate_pose
-from visualizer import HandAngles
+from classes.handAngles import HandAngles
+
 poses = {}
 recorded_pose = None
 

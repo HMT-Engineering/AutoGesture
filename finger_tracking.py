@@ -2,20 +2,16 @@ import asyncio
 import json
 import time
 from pathlib import Path
-import tkinter as tk
-from tkinter import filedialog
-from PIL import Image, ImageTk
 import cv2
 from bleak import BleakGATTCharacteristic
 import csv
 
 import argparse
-import threading
 
 import leap
 
 from  leapmotion import GestureListener, HandPose
-from  visualizer import Canvas
+from  classes.canvas import Canvas
 from bluetooth import dataProcessor, disconnectFromWatch, searchAndConnectToWatch, startRecording, stopRecording, subscribeToData
 
 class FingerTracking:
