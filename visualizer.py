@@ -61,7 +61,7 @@ class Canvas:
     def render_hand_angles(self, hand: HandAngles): 
         cv2.putText(
             self.output_image,
-            f"Thumb: {hand.thumb["base"],hand.thumb["tip"]}",
+            f"Thumb: {hand.thumb['base'],hand.thumb['tip']}",
             (10, self.screen_size[0] - 10),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
@@ -70,7 +70,7 @@ class Canvas:
         )
         cv2.putText(
             self.output_image,
-            f"Index: {hand.index["base"],hand.index["middle"],hand.index["tip"]}",
+            f"Index: {hand.index['base'],hand.index['middle'],hand.index['tip']}",
             (10, self.screen_size[0] - 30),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
@@ -79,7 +79,7 @@ class Canvas:
         )
         cv2.putText(
             self.output_image,
-            f"Middle: {hand.middle["base"],hand.middle["middle"],hand.middle["tip"]}",
+            f"Middle: {hand.middle['base'],hand.middle['middle'],hand.middle['tip']}",
             (10, self.screen_size[0] - 50),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
@@ -88,7 +88,7 @@ class Canvas:
         )
         cv2.putText(
             self.output_image,
-            f"Ring: {hand.ring["base"],hand.ring["middle"],hand.ring["tip"]}",
+            f"Ring: {hand.ring['base'],hand.ring['middle'],hand.ring['tip']}",
             (10, self.screen_size[0] - 70),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
@@ -97,7 +97,7 @@ class Canvas:
         )
         cv2.putText(
             self.output_image,
-            f"Pinky: {hand.pinky["base"],hand.pinky["middle"],hand.pinky["tip"]}",
+            f"Pinky: {hand.pinky['base'],hand.pinky['middle'],hand.pinky['tip']}",
             (10, self.screen_size[0] - 90),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,

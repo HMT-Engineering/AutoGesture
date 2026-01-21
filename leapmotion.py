@@ -196,6 +196,7 @@ def decode_pose (hand: ldt.Hand, restingRotation = 0, poses: list[dict] = defaul
     pinchDistance = hand.pinch_distance
     pinchStrength = hand.pinch_strength
     thumb = hand.digits[0]
+    print(thumb)
     thumbBaseAngle = get_angle(thumb.proximal,thumb.intermediate)
     thumbTipAngle = get_angle(thumb.intermediate,thumb.distal)
     index = hand.digits[1]

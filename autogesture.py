@@ -123,6 +123,17 @@ def open_add_pose_dialog():
     add_button = tk.Button(dialog, text="Add", command=add_pose)
     add_button.grid(row=3, column=0, columnspan=2, pady=10)
 
+
+def toggle_hand_angles_display():
+    if hand_angles_frame.winfo_ismapped():
+        hand_angles_frame.pack_forget()
+        toggle_button.config(text="Show Poses")
+    else:
+        hand_angles_frame.pack(pady=5)
+        toggle_button.config(text="Hide Poses")
+        update_hand_angles_count()
+
+
 # Create the main window
 root = tk.Tk()
 root.title("AutoGesture")
@@ -145,14 +156,6 @@ hand_angles_count_label = tk.Label(frame, text=f"Loaded Poses: {len(poses)}")
 hand_angles_count_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
 # Add a collapsible frame to display the keys of the hand_angles dictionary
-def toggle_hand_angles_display():
-    if hand_angles_frame.winfo_ismapped():
-        hand_angles_frame.pack_forget()
-        toggle_button.config(text="Show Poses")
-    else:
-        hand_angles_frame.pack(pady=5)
-        toggle_button.config(text="Hide Poses")
-        update_hand_angles_count()
 
 toggle_button = tk.Button(frame, text="Show Poses", command=toggle_hand_angles_display)
 toggle_button.grid(row=0, column=1, padx=5, pady=5, sticky="w")
