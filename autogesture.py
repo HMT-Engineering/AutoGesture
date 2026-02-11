@@ -12,7 +12,7 @@ recorded_pose = None
 
 def start_pose_calibration():
     try:
-        res = subprocess.run(["python3", "pose_calibration.py", "--single"], check=True,
+        res = subprocess.run(["python3", "libs/pose_calibration.py", "--single"], check=True,
             capture_output = True, # Python >= 3.7 only
             text = True # Python >= 3.7 only)
         )
@@ -31,7 +31,7 @@ def start_pose_calibration():
 def start_pose_recorder():
     try:
         poses = filedialog.askopenfilename(title="Select Poses", filetypes=[("JSON files", "*.json")])
-        res = subprocess.run(["python3", "finger_tracking.py", "--path", poses])
+        res = subprocess.run(["python3", "libs/finger_tracking.py", "--path", poses])
         # pose_json = str(res.stdout)
         # if (pose_json != "CANCELLED"):
         #     pose = json.loads(pose_json)
@@ -55,7 +55,7 @@ def update_hand_angles_count():
         pose_item_frame.pack(fill="x", pady=2)
         
         label_text = f"{key}:\n{data.get('poseVector', 'N/A')}"
-        label = tk.Label(pose_item_frame, text=label_text, anchor="w", justify="left", font=("Courier", 8))
+        label = tk.Label(pose_item_frame, text=label_text, anchor="w", justify="left", font=("Courier", 12))
         label.pack(side="left", fill="x", expand=True)
         
         def remove_pose(k=key):

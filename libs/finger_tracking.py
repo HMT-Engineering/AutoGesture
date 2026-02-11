@@ -11,8 +11,8 @@ import argparse
 import leap
 
 from  leapmotion import GestureListener, HandPose
-from  libs.canvas import Canvas
-from libs.bluetooth import disconnectFromWatch, searchAndConnectToWatch, startRecording, stopRecording, subscribeToData
+from  canvas import Canvas
+from bluetooth import disconnectFromWatch, searchAndConnectToWatch, startRecording, stopRecording, subscribeToData
 
 class FingerTracking:
     def __init__(self):

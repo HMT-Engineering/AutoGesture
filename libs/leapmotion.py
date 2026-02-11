@@ -192,31 +192,29 @@ def get_most_similar_pose(poseVector: np.ndarray[float], poses: list[dict]) -> H
    
 
 def decode_pose (hand: ldt.Hand, restingRotation = 0, poses: list[dict] = default_poses) -> HandPose:
-    HandPose()
     pinchDistance = hand.pinch_distance
     pinchStrength = hand.pinch_strength
     thumb = hand.digits[0]
-    print(thumb)
-    thumbBaseAngle = get_angle(thumb.proximal,thumb.intermediate)
-    thumbTipAngle = get_angle(thumb.intermediate,thumb.distal)
+    thumbBaseAngle = get_angle(thumb.proximal, thumb.intermediate)
+    thumbTipAngle = get_angle(thumb.intermediate, thumb.distal)
     index = hand.digits[1]
-    indexBaseAngle = get_angle(index.metacarpal,index.proximal)
-    indexMiddleAngle = get_angle(index.proximal,index.intermediate)
-    indexTipAngle = get_angle(index.intermediate,index.distal)
+    indexBaseAngle = get_angle(index.metacarpal, index.proximal)
+    indexMiddleAngle = get_angle(index.proximal, index.intermediate)
+    indexTipAngle = get_angle(index.intermediate, index.distal)
     middle = hand.digits[2]
-    middleBaseAngle = get_angle(middle.metacarpal,middle.proximal)
-    middleMiddleAngle = get_angle(middle.proximal,middle.intermediate)
-    middleTipAngle = get_angle(middle.intermediate,middle.distal)
+    middleBaseAngle = get_angle(middle.metacarpal, middle.proximal)
+    middleMiddleAngle = get_angle(middle.proximal, middle.intermediate)
+    middleTipAngle = get_angle(middle.intermediate, middle.distal)
     ring = hand.digits[3]
-    ringBaseAngle = get_angle(ring.metacarpal,ring.proximal)
-    ringMiddleAngle = get_angle(ring.proximal,ring.intermediate)
-    ringTipAngle = get_angle(ring.intermediate,ring.distal)
+    ringBaseAngle = get_angle(ring.metacarpal, ring.proximal)
+    ringMiddleAngle = get_angle(ring.proximal, ring.intermediate)
+    ringTipAngle = get_angle(ring.intermediate, ring.distal)
     pinky = hand.digits[4]
-    pinkyBaseAngle = get_angle(pinky.metacarpal,pinky.proximal)
-    pinkyMiddleAngle = get_angle(pinky.proximal,pinky.intermediate)
-    pinkyTipAngle = get_angle(pinky.intermediate,pinky.distal)
+    pinkyBaseAngle = get_angle(pinky.metacarpal, pinky.proximal)
+    pinkyMiddleAngle = get_angle(pinky.proximal, pinky.intermediate)
+    pinkyTipAngle = get_angle(pinky.intermediate, pinky.distal)
     handRot = np.rad2deg(euler_from_quaternion(hand.palm.orientation))
-    if(handRot[2] < 0):
+    if handRot[2] < 0:
         handRot[2] = handRot[2] + 360
     poseVector = np.array([
         thumbBaseAngle,thumbTipAngle,
