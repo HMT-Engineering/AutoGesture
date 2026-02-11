@@ -69,8 +69,8 @@ def save_poses_to_files():
             print(f"Error saving poses: {e}")
 
 def load_poses_from_files():
-    poses = filedialog.askopenfilenames(title="Select Poses", filetypes=[("JSON files", "*.json")])
-    for pose_file in poses:
+    pose_files = filedialog.askopenfilenames(title="Select Poses", filetypes=[("JSON files", "*.json")])
+    for pose_file in pose_files:
         try:
             with open(pose_file, 'r') as file:
                 data = json.load(file)  # Parse JSON data       
