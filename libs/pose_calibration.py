@@ -12,6 +12,7 @@ import argparse
 
 from canvas import Canvas
 from handAngles import HandAngles
+from hand_pose import HandPose
 
 
 def decode_pose(hand: ldt.Hand):
@@ -98,6 +99,7 @@ class PoseCalibration(leap.Listener):
         if len(event.hands) != 0:
             hand = event.hands[0]
             self.handAngles = decode_pose(hand)
+            hand_pose = HandPose(hand)
             self.canvas.render_hands(event)
             timestamp = str(int(1000 * (time.time())))
             self.canvas.render_timestamp(timestamp)
