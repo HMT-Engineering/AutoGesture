@@ -10,9 +10,12 @@ import argparse
 
 import leap
 
-from  leapmotion import GestureListener, HandPose
+from  leapmotion import HandPose
 from  canvas import Canvas
 from bluetooth import disconnectFromWatch, searchAndConnectToWatch, startRecording, stopRecording, subscribeToData
+from gesture_listener import GestureListener
+from hand_pose import json_to_hand_pose
+
 
 class FingerTracking:
     def __init__(self):
@@ -33,7 +36,7 @@ class FingerTracking:
         self.last_frame_time = time.time()
 
 
-    def on_pose_detected(self, event,pose:HandPose):
+    def on_pose_detected(self, event,pose:str):
         self.canvas.render_hands(event)
         timestamp = str(int(1000*(time.time())))
         self.canvas.render_timestamp(timestamp)
@@ -41,13 +44,13 @@ class FingerTracking:
             if(self.last_frame_time + 1/self.framerate < time.time()):
                 self.last_frame_time = time.time()
                 self.recorded_frames[timestamp] = self.canvas.output_image.copy()
-        self.canvas.render_pose(pose.decodedPose)
+        self.canvas.render_pose(pose)
         self.canvas.render_instructions("x: Exit, r: Start Rec, s: Stop Rec, c: Connect watch", self.recording)
-        if(self.recording):
-            self.recorded_hands[timestamp] = pose
-            self.recorded_poses[timestamp] = pose.decodedPose
-            if(self._manual_label != ""):
-                self.manual_poses[timestamp] = self._manual_label
+        #if(self.recording):
+            # self.recorded_hands[timestamp] = pose
+            # self.recorded_poses[timestamp] = pose.decodedPose
+            # if(self._manual_label != ""):
+            #     self.manual_poses[timestamp] = self._manual_label
         
     def save_recorded_data(self):
         Path(f"./recordings/{self.start_timestamp}").mkdir(exist_ok=True)
@@ -103,8 +106,8 @@ class FingerTracking:
                     case 'P':
                         self.recorded_ppg[time] = values
         
-    async def mainloop(self, poses: list[dict] = None):
-        tracking_listener = GestureListener(self.on_pose_detected, customposes=poses)
+    async def mainloop(self, custom_poses: dict[str,HandPose] = None):
+        tracking_listener = GestureListener(self.on_pose_detected, customposes=custom_poses)
         connection = leap.Connection()
         connection.add_listener(tracking_listener)
         with connection.open():
@@ -158,19 +161,23 @@ class FingerTracking:
                     print(f"Manual label set to Resting")
                     self._manual_label = "Pose.Resting"
 
-async def start_window(poses: list[dict] = None):
+async def start_window(custom_poses: dict[str,HandPose] = None):
     fingertracker = FingerTracking()
-    await fingertracker.mainloop(poses)
+    await fingertracker.mainloop(custom_poses)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Pose Recording Tool")
     parser.add_argument("--path", type=str , help="Path to poses.json file")
     args = parser.parse_args()
     print(args)
+    poses = {}
     if args.path:
         try:
             with open(args.path, 'r') as f:
-                poses = json.load(f)
+                poses_dict = json.load(f)
+                print(f"Loaded {len(poses_dict)} poses.")
+                for pose_name, pose_data in poses_dict.items():
+                    poses[pose_name] = json_to_hand_pose(pose_data)
         except FileNotFoundError:
             print(f"File {args.path} not found.")
             poses = None

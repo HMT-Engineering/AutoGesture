@@ -5,9 +5,9 @@ from tkinter import filedialog
 from PIL import Image, ImageTk
 import json
 
-from libs.handAngles import HandAngles
+from libs.hand_pose import HandPose, json_to_hand_pose
 
-poses = {}
+poses: dict[str, HandPose] = {}
 recorded_pose = None
 
 def start_pose_calibration():
@@ -18,10 +18,9 @@ def start_pose_calibration():
         )
         pose_json = str(res.stdout)
         if (pose_json != "CANCELLED"):
-            pose = json.loads(pose_json)
-            hand_angle = HandAngles(pose)
-            print("Pose loaded:", hand_angle.__dict__)
-            return hand_angle
+            hand_pose = json_to_hand_pose(json.loads(pose_json))
+            print("Pose loaded:", hand_pose.as_dict())
+            return hand_pose
         else:
             print("Pose calibration cancelled.")
             return None
@@ -30,8 +29,8 @@ def start_pose_calibration():
 
 def start_pose_recorder():
     try:
-        poses = filedialog.askopenfilename(title="Select Poses", filetypes=[("JSON files", "*.json")])
-        res = subprocess.run(["python3", "libs/finger_tracking.py", "--path", poses])
+        poses_dict = filedialog.askopenfilename(title="Select Poses", filetypes=[("JSON files", "*.json")])
+        res = subprocess.run(["python3", "libs/finger_tracking.py", "--path", poses_dict])
         # pose_json = str(res.stdout)
         # if (pose_json != "CANCELLED"):
         #     pose = json.loads(pose_json)
@@ -53,8 +52,8 @@ def update_hand_angles_count():
     for key, data in poses.items():
         pose_item_frame = tk.Frame(hand_angles_frame)
         pose_item_frame.pack(fill="x", pady=2)
-        
-        label_text = f"{key}:\n{data.get('poseVector', 'N/A')}"
+
+        label_text = f"{key}:\n{data.pose_vector}"
         label = tk.Label(pose_item_frame, text=label_text, anchor="w", justify="left", font=("Courier", 12))
         label.pack(side="left", fill="x", expand=True)
         
@@ -69,13 +68,16 @@ def update_hand_angles_count():
 def save_poses_to_files():
     #poses[pose_name] = { 
             #     "pose": pose_value,
-            #     "poseVector": f'[{pose.handRot["x"]},{pose.handRot["y"]},{pose.thumb["base"]},{pose.thumb["tip"]},{pose.index["base"]},{pose.index["middle"]},{pose.index["tip"]},{pose.middle["base"]},{pose.middle["middle"]},{pose.middle["tip"]},{pose.ring["base"]},{pose.ring["middle"]},{pose.ring["tip"]},{pose.pinky["base"]},{pose.pinky["middle"]},{pose.pinky["tip"]}]'
+            #     "pose_vector": f'[{pose.handRot["x"]},{pose.handRot["y"]},{pose.thumb["base"]},{pose.thumb["tip"]},{pose.index["base"]},{pose.index["middle"]},{pose.index["tip"]},{pose.middle["base"]},{pose.middle["middle"]},{pose.middle["tip"]},{pose.ring["base"]},{pose.ring["middle"]},{pose.ring["tip"]},{pose.pinky["base"]},{pose.pinky["middle"]},{pose.pinky["tip"]}]'
             # }
     save_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
     if save_path:
         try:
             with open(save_path, 'w') as file:
-                json.dump(poses, file, indent=4)  # Save poses as JSON
+                poses_dict = {}
+                for pose_name, pose in poses.items():
+                    poses_dict[pose_name] = pose.as_dict()
+                json.dump(poses_dict, file, indent=4)  # Save poses as JSON
             print(f"Poses saved to {save_path}")
         except Exception as e:
             print(f"Error saving poses: {e}")
@@ -88,13 +90,10 @@ def load_poses_from_files():
                 data = json.load(file)  # Parse JSON data       
                 #poses[pose_name] = { 
                 #     "pose": pose_value,
-                #     "poseVector": f'[{pose.handRot["x"]},{pose.handRot["y"]},{pose.thumb["base"]},{pose.thumb["tip"]},{pose.index["base"]},{pose.index["middle"]},{pose.index["tip"]},{pose.middle["base"]},{pose.middle["middle"]},{pose.middle["tip"]},{pose.ring["base"]},{pose.ring["middle"]},{pose.ring["tip"]},{pose.pinky["base"]},{pose.pinky["middle"]},{pose.pinky["tip"]}]'
+                #     "pose_vector": f'[{pose.handRot["x"]},{pose.handRot["y"]},{pose.thumb["base"]},{pose.thumb["tip"]},{pose.index["base"]},{pose.index["middle"]},{pose.index["tip"]},{pose.middle["base"]},{pose.middle["middle"]},{pose.middle["tip"]},{pose.ring["base"]},{pose.ring["middle"]},{pose.ring["tip"]},{pose.pinky["base"]},{pose.pinky["middle"]},{pose.pinky["tip"]}]'
                 # }
                 for pose_name, pose_data in data.items():
-                    poses[pose_name] = {
-                        "pose": pose_data["pose"],
-                        "poseVector": pose_data["poseVector"]
-                    }
+                    poses[pose_name] = json_to_hand_pose(pose_data)
         except Exception as e:
             print(f"Error reading {pose_file}: {e}")
     print("Loaded HandAngles:", [ha for ha in poses.keys()])
@@ -132,10 +131,7 @@ def open_add_pose_dialog():
                 dialog.destroy()
                 return
             print("Pose:", pose)
-            poses[pose_name] = { 
-                "pose": pose_value,
-                "poseVector": f'[{pose.handRot["x"]},{pose.handRot["y"]},{pose.thumb["base"]},{pose.thumb["tip"]},{pose.index["base"]},{pose.index["middle"]},{pose.index["tip"]},{pose.middle["base"]},{pose.middle["middle"]},{pose.middle["tip"]},{pose.ring["base"]},{pose.ring["middle"]},{pose.ring["tip"]},{pose.pinky["base"]},{pose.pinky["middle"]},{pose.pinky["tip"]}]'
-            }
+            poses[pose_name] = pose
             update_hand_angles_count()
             dialog.destroy()
         except ValueError:

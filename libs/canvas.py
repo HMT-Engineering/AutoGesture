@@ -5,10 +5,14 @@ from handAngles import HandAngles
 from leapmotion import Pose
 
 from leap.events import Event
+
+from hand_pose import HandPose
+
+
 class Canvas:
     def __init__(self):
         self.name = "Hand Visualizer"
-        self.screen_size = [500, 500]
+        self.screen_size = [600, 1500]
         self.hands_colour = (255, 255, 255)
         self.font_colour = (0, 255, 44)
         self.recording_font_colour = (0, 0, 255)
@@ -120,7 +124,81 @@ class Canvas:
             1,
         )
 
-    def render_pose(self, motion: Pose):
+    def render_hand_canonical_pose(self, hand: HandPose):
+        cv2.putText(
+            self.output_image,
+            f"Thumb: {hand.pose_vector[0:9]}",
+            (10, self.screen_size[0] - 10),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            self.font_colour,
+            1,
+        )
+        cv2.putText(
+            self.output_image,
+            f"Index: {hand.pose_vector[9:18]}",
+            (10, self.screen_size[0] - 30),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            self.font_colour,
+            1,
+        )
+        cv2.putText(
+            self.output_image,
+            f"Middle: {hand.pose_vector[18:27]}",
+            (10, self.screen_size[0] - 50),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            self.font_colour,
+            1,
+        )
+        cv2.putText(
+            self.output_image,
+            f"Ring: {hand.pose_vector[27:36]}",
+            (10, self.screen_size[0] - 70),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            self.font_colour,
+            1,
+        )
+        cv2.putText(
+            self.output_image,
+            f"Pinky: {hand.pose_vector[36:45]}",
+            (10, self.screen_size[0] - 90),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            self.font_colour,
+            1,
+        )
+        cv2.putText(
+            self.output_image,
+            f"Hand Rotation: {hand.palm_orientation}",
+            (10, self.screen_size[0] - 110),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            self.font_colour,
+            1,
+        )
+        cv2.putText(
+            self.output_image,
+            f"Pinch Distance: {hand.pinch_distance}",
+            (10, self.screen_size[0] - 130),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            self.font_colour,
+            1,
+        )
+        cv2.putText(
+            self.output_image,
+            f"Pinch Strength: {hand.pinch_strength}",
+            (10, self.screen_size[0] - 150),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            self.font_colour,
+            1,
+        )
+
+    def render_pose(self, motion: str):
         cv2.putText(
             self.output_image,
             f"Detected Motion: {motion}",

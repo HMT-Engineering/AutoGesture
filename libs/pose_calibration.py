@@ -89,6 +89,7 @@ def get_angle(bone1: ldt.Bone, bone2: ldt.Bone):
 
 class PoseCalibration(leap.Listener):
     def __init__(self):
+        self.hand_pose = None
         self.client = None
         self.running = False
         self.canvas = Canvas()
@@ -98,12 +99,12 @@ class PoseCalibration(leap.Listener):
     def on_tracking_event(self, event):
         if len(event.hands) != 0:
             hand = event.hands[0]
-            self.handAngles = decode_pose(hand)
-            hand_pose = HandPose(hand)
+            self.hand_pose = HandPose()
+            self.hand_pose.set_pose_from_hand(hand)
             self.canvas.render_hands(event)
             timestamp = str(int(1000 * (time.time())))
             self.canvas.render_timestamp(timestamp)
-            self.canvas.render_hand_angles(self.handAngles)
+            self.canvas.render_hand_canonical_pose(self.hand_pose)
             self.canvas.render_instructions("x: Exit, s: Capture Pose")
 
     async def mainloop(self):
@@ -120,15 +121,12 @@ class PoseCalibration(leap.Listener):
                     self.running = False
                 elif key == ord("s"):
                     print("Save Grasp Position")
-                    pose = self.handAngles
+                    pose = self.hand_pose
                     save_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
                     if save_path:
                         with open(save_path, "w") as f:
-                            json.dump(pose.__dict__, f)
+                            json.dump(pose.as_dict(), f)
                         print(f"Pose saved to {save_path}")
-                    print(
-                        f'[{pose.thumb["base"]},{pose.thumb["tip"]},{pose.index["base"]},{pose.index["middle"]},{pose.index["tip"]},{pose.middle["base"]},{pose.middle["middle"]},{pose.middle["tip"]},{pose.ring["base"]},{pose.ring["middle"]},{pose.ring["tip"]},{pose.pinky["base"]},{pose.pinky["middle"]},{pose.pinky["tip"]}]'
-                    )
 
     async def record_single_pose(self):
         connection = leap.Connection()
@@ -143,7 +141,7 @@ class PoseCalibration(leap.Listener):
                     print("CANCELLED")
                     self.running = False
                 elif key == ord("s"):
-                    pose = self.handAngles
+                    pose = self.hand_pose
                     self.running = False
                     return pose
 
@@ -165,6 +163,6 @@ if __name__ == "__main__":
 
     if args.single:
         pose = asyncio.run(calibrate_pose())
-        print(json.dumps(pose.__dict__))
+        print(json.dumps(pose.as_dict()))
     else: 
         asyncio.run(start_window())
