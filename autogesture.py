@@ -50,9 +50,21 @@ def update_hand_angles_count():
     hand_angles_count_label.config(text=f"Loaded Poses: {len(poses)}")
     for widget in hand_angles_frame.winfo_children():
         widget.destroy()  # Clear the frame
-    for key in poses.keys():
-        label = tk.Label(hand_angles_frame, text=key)
-        label.pack(anchor="w")
+    for key, data in poses.items():
+        pose_item_frame = tk.Frame(hand_angles_frame)
+        pose_item_frame.pack(fill="x", pady=2)
+        
+        label_text = f"{key}:\n{data.get('poseVector', 'N/A')}"
+        label = tk.Label(pose_item_frame, text=label_text, anchor="w", justify="left", font=("Courier", 8))
+        label.pack(side="left", fill="x", expand=True)
+        
+        def remove_pose(k=key):
+            if k in poses:
+                del poses[k]
+                update_hand_angles_count()
+
+        remove_btn = tk.Button(pose_item_frame, text="Remove", command=remove_pose, fg="#d32f2f")
+        remove_btn.pack(side="right", padx=5)
 
 def save_poses_to_files():
     #poses[pose_name] = { 
@@ -104,14 +116,22 @@ def open_add_pose_dialog():
     def add_pose():
         print("Adding pose...")
         pose_name = pose_name_entry.get()
+        if not pose_name:
+            tk.messagebox.showerror("Error", "Pose name cannot be empty.")
+            return
         try:
+            pose_value_str = pose_value_entry.get()
+            if not pose_value_str:
+                tk.messagebox.showerror("Error", "Pose value cannot be empty.")
+                return
+            pose_value = int(pose_value_str)
+            
             pose = start_pose_calibration()
             if pose is None:
                 tk.messagebox.showerror("Error", "Pose calibration cancelled.")
                 dialog.destroy()
                 return
             print("Pose:", pose)
-            pose_value = int(pose_value_entry.get())
             poses[pose_name] = { 
                 "pose": pose_value,
                 "poseVector": f'[{pose.handRot["x"]},{pose.handRot["y"]},{pose.thumb["base"]},{pose.thumb["tip"]},{pose.index["base"]},{pose.index["middle"]},{pose.index["tip"]},{pose.middle["base"]},{pose.middle["middle"]},{pose.middle["tip"]},{pose.ring["base"]},{pose.ring["middle"]},{pose.ring["tip"]},{pose.pinky["base"]},{pose.pinky["middle"]},{pose.pinky["tip"]}]'
@@ -129,7 +149,7 @@ def toggle_hand_angles_display():
         hand_angles_frame.pack_forget()
         toggle_button.config(text="Show Poses")
     else:
-        hand_angles_frame.pack(pady=5)
+        hand_angles_frame.pack(fill="x", pady=5, after=management_frame)
         toggle_button.config(text="Hide Poses")
         update_hand_angles_count()
 
@@ -138,44 +158,65 @@ def toggle_hand_angles_display():
 root = tk.Tk()
 root.title("AutoGesture")
 # Set the window size
-root.geometry("512x400")
+root.geometry("600x600")
 
 # Add a logo at the top left corner
-image = Image.open("logo.png")
-image = image.resize((64, 64))
-logo = ImageTk.PhotoImage(image)
-logo_label = tk.Label(root, image=logo)
-logo_label.image = logo  # Keep a reference to avoid garbage collection
-logo_label.pack(anchor="nw", padx=10, pady=10)
+try:
+    image = Image.open("logo.png")
+    image = image.resize((64, 64))
+    logo = ImageTk.PhotoImage(image)
+    logo_label = tk.Label(root, image=logo)
+    logo_label.image = logo  # Keep a reference to avoid garbage collection
+    logo_label.pack(anchor="nw", padx=20, pady=10)
+except Exception as e:
+    print(f"Could not load logo: {e}")
 
+# Main container for better padding
+main_container = tk.Frame(root, padx=20, pady=10)
+main_container.pack(fill="both", expand=True)
 
-frame = tk.Frame(root, borderwidth=2, relief="groove")
-frame.pack(pady=10)
-# Label to show the number of loaded hand angles
-hand_angles_count_label = tk.Label(frame, text=f"Loaded Poses: {len(poses)}") 
-hand_angles_count_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+# --- Management Block ---
+management_frame = tk.LabelFrame(main_container, text="Pose Management", padx=10, pady=10, font=("Helvetica", 10, "bold"))
+management_frame.pack(fill="x", pady=5)
 
-# Add a collapsible frame to display the keys of the hand_angles dictionary
+hand_angles_count_label = tk.Label(management_frame, text=f"Loaded Poses: {len(poses)}") 
+hand_angles_count_label.grid(row=0, column=0, sticky="w", pady=5)
 
-toggle_button = tk.Button(frame, text="Show Poses", command=toggle_hand_angles_display)
-toggle_button.grid(row=0, column=1, padx=5, pady=5, sticky="w")
+toggle_button = tk.Button(management_frame, text="Show Poses", command=toggle_hand_angles_display)
+toggle_button.grid(row=0, column=1, padx=10, pady=5)
 
-button2 = tk.Button(frame, text="Load Poses From File", command=load_poses_from_files)
-button2.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+button2 = tk.Button(management_frame, text="Load Poses From File", command=load_poses_from_files)
+button2.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
 
-button3 = tk.Button(frame, text="Save Poses to File", command=save_poses_to_files)
-button3.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+button3 = tk.Button(management_frame, text="Save Poses to File", command=save_poses_to_files)
+button3.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
 
+# Hand angles list (collapsible)
+hand_angles_frame = tk.Frame(main_container)
 
-hand_angles_frame = tk.Frame(root)
+# --- Add Block ---
+add_frame = tk.LabelFrame(main_container, text="Add New Pose", padx=10, pady=10, font=("Helvetica", 10, "bold"))
+add_frame.pack(fill="x", pady=10)
 
+add_pose_button = tk.Button(add_frame, text="Add Pose", command=open_add_pose_dialog, bg="#e1e1e1")
+add_pose_button.pack(fill="x", pady=5)
 
-add_pose_button = tk.Button(frame, text="Add Pose", command=open_add_pose_dialog)
-add_pose_button.grid(row=2, column=0, padx=5, pady=5, sticky="w")
-add_pose_button = tk.Button(frame, text="Start Recorder", command=start_pose_recorder)
-add_pose_button.grid(row=2, column=1, padx=5, pady=5, sticky="w")
+# --- Recording Block ---
+recording_frame = tk.Frame(root)
+recording_frame.pack(side="bottom", fill="x", padx=20, pady=20)
 
-
+start_recorder_button = tk.Button(
+    recording_frame, 
+    text="Start Recorder", 
+    command=start_pose_recorder,
+    bg="#4CAF50",
+    fg="red",
+    font=("Helvetica", 12, "bold"),
+    padx=20,
+    pady=10,
+    relief="raised"
+)
+start_recorder_button.pack(side="right")
 
 # Start the Tkinter event loop
 root.mainloop()
