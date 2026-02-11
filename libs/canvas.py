@@ -1,8 +1,8 @@
 import numpy as np
 import cv2
 
-from classes.handAngles import HandAngles
-from leapmotion import Pose
+from libs.handAngles import HandAngles
+from libs.leapmotion import Pose
 
 from leap.events import Event
 class Canvas:

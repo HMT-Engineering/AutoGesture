@@ -1,0 +1,14 @@
+bleak==2.1.1
+cffi==2.0.0
+# Editable install with no version control (leap==0.0.1)
+-e /Users/tomhetto/Downloads/leapc-python-bindings-main/leapc-python-api
+leapc_cffi @ file:///Users/tomhetto/Downloads/leapc-python-bindings-main/leapc-cffi/dist/leapc_cffi-0.0.1.tar.gz#sha256=5074152e5dc28620f6e102eb0e95c2f4e0e926c6a0a65edb71ac1b0de7f8f72c
+numpy==2.4.2
+opencv-python==4.13.0.92
+pillow==12.1.1
+pycparser==3.0
+pyobjc-core==12.1
+pyobjc-framework-Cocoa==12.1
+pyobjc-framework-CoreBluetooth==12.1
+pyobjc-framework-libdispatch==12.1
+scipy==1.17.0

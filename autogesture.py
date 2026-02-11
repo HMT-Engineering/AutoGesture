@@ -5,7 +5,7 @@ from tkinter import filedialog
 from PIL import Image, ImageTk
 import json
 
-from classes.handAngles import HandAngles
+from libs.handAngles import HandAngles
 
 poses = {}
 recorded_pose = None
