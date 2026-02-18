@@ -105,7 +105,7 @@ class PoseCalibration(leap.Listener):
             timestamp = str(int(1000 * (time.time())))
             self.canvas.render_timestamp(timestamp)
             self.canvas.render_hand_canonical_pose(self.hand_pose)
-            self.canvas.render_instructions("x: Exit, s: Capture Pose")
+            self.canvas.render_instructions("x: Exit, s || l: Capture Pose")
 
     async def mainloop(self):
         connection = leap.Connection()
@@ -119,7 +119,7 @@ class PoseCalibration(leap.Listener):
                 if key == ord("x"):
                     print("Exiting")
                     self.running = False
-                elif key == ord("s"):
+                elif key == ord("s") or key == ord("l"):
                     print("Save Grasp Position")
                     pose = self.hand_pose
                     save_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
@@ -140,7 +140,7 @@ class PoseCalibration(leap.Listener):
                 if key == ord("x"):
                     print("CANCELLED")
                     self.running = False
-                elif key == ord("s"):
+                elif key == ord("s") or key == ord("l"):
                     pose = self.hand_pose
                     self.running = False
                     return pose

@@ -198,10 +198,10 @@ class Canvas:
             1,
         )
 
-    def render_pose(self, motion: str):
+    def render_pose(self, motion: str, similarity: float = 0.0):
         cv2.putText(
             self.output_image,
-            f"Detected Motion: {motion}",
+            f"Detected Motion: {motion} (Similarity: {similarity:.2f})",
             (10, self.screen_size[0] - 10),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,

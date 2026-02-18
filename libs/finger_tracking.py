@@ -36,7 +36,7 @@ class FingerTracking:
         self.last_frame_time = time.time()
 
 
-    def on_pose_detected(self, event,pose:str):
+    def on_pose_detected(self, event,pose:str, similarity:float):
         self.canvas.render_hands(event)
         timestamp = str(int(1000*(time.time())))
         self.canvas.render_timestamp(timestamp)
@@ -44,13 +44,13 @@ class FingerTracking:
             if(self.last_frame_time + 1/self.framerate < time.time()):
                 self.last_frame_time = time.time()
                 self.recorded_frames[timestamp] = self.canvas.output_image.copy()
-        self.canvas.render_pose(pose)
+        self.canvas.render_pose(pose, similarity)
         self.canvas.render_instructions("x: Exit, r: Start Rec, s: Stop Rec, c: Connect watch", self.recording)
-        #if(self.recording):
-            # self.recorded_hands[timestamp] = pose
-            # self.recorded_poses[timestamp] = pose.decodedPose
-            # if(self._manual_label != ""):
-            #     self.manual_poses[timestamp] = self._manual_label
+        if(self.recording):
+            #self.recorded_hands[timestamp] = pose
+            self.recorded_poses[timestamp] = {"pose": pose, "similarity":similarity}
+            if(self._manual_label != ""):
+                self.manual_poses[timestamp] = self._manual_label
         
     def save_recorded_data(self):
         Path(f"./recordings/{self.start_timestamp}").mkdir(exist_ok=True)
@@ -77,9 +77,9 @@ class FingerTracking:
                 writer.writerow([time,self.recorded_ppg[time][0],self.recorded_ppg[time][1],self.recorded_ppg[time][2]])
         with open(f"./recordings/{self.start_timestamp}/poses.csv", 'w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(["Timestamp", "Pose"])
+            writer.writerow(["Timestamp", "Pose", "Similarity"])
             for time in self.recorded_poses.keys():
-                writer.writerow([time,self.recorded_poses[time]])
+                writer.writerow([time,self.recorded_poses[time]["pose"],self.recorded_poses[time]["similarity"]])
         with open(f"./recordings/{self.start_timestamp}/manual_poses.csv", 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(["Timestamp", "Pose"])

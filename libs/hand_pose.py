@@ -180,7 +180,7 @@ class HandPose:
         return calculate_similarity(self.pose_vector, target_pose.pose_vector)
 
 
-def get_most_similar_pose(hand_pose : HandPose, poses: dict[str,HandPose]) -> HandPose:
+def get_most_similar_pose(hand_pose : HandPose, poses: dict[str,HandPose]):
     # if self.handRot[0] < -30:
     #     self.decodedPose = Pose.WristFlickDown
     # elif self.handRot[0] > 50:
@@ -196,6 +196,6 @@ def get_most_similar_pose(hand_pose : HandPose, poses: dict[str,HandPose]) -> Ha
         if similarity > highestSimilarity:
             decodedPose = pose
             highestSimilarity = similarity
-    if highestSimilarity < 0.9:
-        decodedPose = "unknown"
-    return decodedPose
+    # if highestSimilarity < 0.9:
+    #     decodedPose = "unknown"
+    return decodedPose, highestSimilarity
